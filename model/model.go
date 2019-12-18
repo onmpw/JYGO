@@ -35,8 +35,8 @@ type ContractModel interface {
 }
 
 func Init() {
-	_ = db.Db.Init()
 	_ = config.Init()
+	_ = db.Db.Init()
 }
 
 func RegisterModel(models ...interface{}) {
