@@ -1,6 +1,8 @@
 package model
 
 import (
+	"JYGO/config"
+	"JYGO/db"
 	"fmt"
 	"reflect"
 )
@@ -30,6 +32,11 @@ type ContractModel interface {
 	GetOne()	*modelInfo
 	Get()		[]*modelInfo
 	Count()		int64
+}
+
+func Init() {
+	_ = db.Db.Init()
+	_ = config.Init()
 }
 
 func RegisterModel(models ...interface{}) {
