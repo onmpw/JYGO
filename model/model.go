@@ -1,8 +1,8 @@
 package model
 
 import (
-	"github.com/onmpw/JYGO/config"
-	"github.com/onmpw/JYGO/db"
+	"JYGO/config"
+	"JYGO/db"
 	"fmt"
 	"reflect"
 )
@@ -87,8 +87,9 @@ func (m *models)fetchModelByTable(table string) (*modelInfo,bool) {
 	return mi,ok
 }
 
-func (m *models)fetchModel(model interface{},needPtr bool)(*modelInfo,bool) {
+func (m *models)fetchModel(model interface{},needPtr bool)(*modelInfo,reflect.Value,bool) {
 	sv := reflect.ValueOf(model)
+	snd := reflect.Indirect(sv)
 
 	if needPtr && sv.Kind() != reflect.Ptr {
 		panic(fmt.Errorf("cannot use non-ptr model struct `%s`", getFullName(sv)))
@@ -97,9 +98,9 @@ func (m *models)fetchModel(model interface{},needPtr bool)(*modelInfo,bool) {
 	name := getFullName(sv)
 
 	if mi,ok := m.fetchModelByFullName(name); ok {
-		return mi,ok
+		return mi,snd,ok
 	}
-	return nil,false
+	return nil,snd,false
 }
 
 func (m *models)add(table string,model *modelInfo) bool {
@@ -109,8 +110,9 @@ func (m *models)add(table string,model *modelInfo) bool {
 	return true
 }
 
+// Read 获取指定model的Reader 从而可以进行数据的读取
 func Read(model interface{}) ReaderContract {
-	mi ,ok := modelContainer.fetchModel(model,true)
+	mi ,_, ok := modelContainer.fetchModel(model,true)
 	if !ok {
 		panic(fmt.Errorf("model `%s` has not been registered！", reflect.Indirect(reflect.ValueOf(model)).Type().Name()))
 	}
@@ -118,4 +120,17 @@ func Read(model interface{}) ReaderContract {
 
 	r.model = mi
 	return r
+}
+
+func Add(model interface{}) (lastInsertId int) {
+	mi,snd,ok := modelContainer.fetchModel(model,false)
+
+	if !ok {
+		panic(fmt.Errorf("model `%s` has not been registered！", reflect.Indirect(reflect.ValueOf(model)).Type().Name()))
+	}
+
+	fmt.Println(mi.fields)
+	fmt.Println(snd.Field(3).Type())
+
+	return lastInsertId
 }

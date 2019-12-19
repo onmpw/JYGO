@@ -1,6 +1,6 @@
 package db
 
-import "github.com/onmpw/JYGO/config"
+import "JYGO/config"
 
 type dbConfig map[string]string
 
