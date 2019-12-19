@@ -1,8 +1,8 @@
 package model
 
 import (
-	"github.com/onmpw/JYGO/config"
-	"github.com/onmpw/JYGO/db"
+	"JYGO/config"
+	"JYGO/db"
 	"fmt"
 	"reflect"
 )
