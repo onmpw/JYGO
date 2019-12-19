@@ -1,7 +1,7 @@
 package model
 
 import (
-	"JYGO/db"
+	"github.com/onmpw/JYGO/db"
 	"fmt"
 	"log"
 	"reflect"
