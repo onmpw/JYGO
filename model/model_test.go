@@ -16,7 +16,7 @@ func (o *OrderInfo) TableName() string {
 	return "order_info"
 }
 
-func ExampleReaderGetOne() {
+func ExampleReader_GetOne() {
 	Init()
 	RegisterModel(new(OrderInfo))
 
@@ -28,8 +28,35 @@ func ExampleReaderGetOne() {
 		log.Panic(err.Error())
 	}
 
-	panic(order.Id)
+	fmt.Println(order.Id)
+}
 
+func ExampleAdd() {
+	Init()
+	RegisterModel(new(OrderInfo))
+
+	var order OrderInfo
+	order.Oid = "3423328"
+	order.Username = "JYGO"
+
+	lastInsertId := Add(order)
+
+	fmt.Println(lastInsertId)
+}
+
+func ExampleReader_GetAll() {
+	Init()
+	RegisterModel(new(OrderInfo))
+
+	var orders []*OrderInfo
+
+	num , err := Read(new(OrderInfo)).Filter("id",87).GetAll(&orders)
+
+	if err != nil {
+		log.Panic(err.Error())
+	}
+
+	fmt.Println(num)
 }
 
 func TestInit(t *testing.T) {

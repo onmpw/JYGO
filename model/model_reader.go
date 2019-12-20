@@ -47,10 +47,12 @@ func (r *Reader) GetAll(models interface{}) (int64, error) {
 
 	slice := ind
 
-	connect := db.Db.Connector()
+	/*connect := db.Db.Connector()
 	if r.model.connection != "" {
 		connect = db.Db.GetConnection(r.model.connection)
-	}
+	}*/
+	connect := getConnector(r.model)
+
 	rows := connect.Table(r.model.table).Select(r.model.fields...).Where(r.where...).Get()
 
 	refs := make([]interface{}, len(r.model.fields))
@@ -131,7 +133,9 @@ func (r *Reader) GetOne(model interface{}) error {
 
 	obj := reflect.New(reflect.ValueOf(r.model.model).Type().Elem())
 
-	row := db.Db.Connector().Table(r.model.table).Select(r.model.fields...).Where(r.where...).GetOne()
+	connect := getConnector(r.model)
+
+	row := connect.Table(r.model.table).Select(r.model.fields...).Where(r.where...).GetOne()
 
 	refs := make([]interface{}, len(r.model.fields))
 	for i := range refs {

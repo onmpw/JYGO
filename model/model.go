@@ -122,15 +122,40 @@ func Read(model interface{}) ReaderContract {
 	return r
 }
 
-func Add(model interface{}) (lastInsertId int) {
+func Add(model interface{}) (lastInsertId int64) {
 	mi,snd,ok := modelContainer.fetchModel(model,false)
 
 	if !ok {
 		panic(fmt.Errorf("model `%s` has not been registered！", reflect.Indirect(reflect.ValueOf(model)).Type().Name()))
 	}
 
-	fmt.Println(mi.fields)
-	fmt.Println(snd.Field(3).Type())
+	var insertData []interface{}
+
+	for index,field := range mi.fields {
+		fieldObj := snd.Field(index)
+
+		insertData = append(insertData,[]interface{}{field,fieldObj.Interface()})
+	}
+
+	connect := getConnector(mi)
+
+	result,err := connect.Table(mi.table).Add(insertData...)
+
+	if err != nil {
+		panic(fmt.Errorf("Insert `%s` Failed ",mi.table))
+	}
+
+	lastInsertId ,_ = result.LastInsertId()
 
 	return lastInsertId
+}
+
+
+func getConnector(mi *modelInfo) db.BaseDbContract {
+	connect := db.Db.Connector()
+	if mi.connection != "" {
+		connect = db.Db.GetConnection(mi.connection)
+	}
+
+	return connect
 }
