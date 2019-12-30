@@ -34,7 +34,7 @@ type ContractModel interface {
 }
 
 func Init() {
-	_ = config.Init("monitor")
+	_ = config.Init("/etc/monitor.ini")
 	_ = db.Db.Init()
 }
 
