@@ -35,7 +35,7 @@ type ContractModel interface {
 }
 
 func Init() {
-	_ = config.Init()
+	_ = config.Init("monitor")
 	_ = db.Db.Init()
 }
 
@@ -122,6 +122,7 @@ func Read(model interface{}) ReaderContract {
 	return r
 }
 
+// Add 添加记录
 func Add(model interface{}) (lastInsertId int64) {
 	mi,snd,ok := modelContainer.fetchModel(model,false)
 
