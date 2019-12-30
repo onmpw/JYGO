@@ -6,16 +6,26 @@ import (
 )
 
 const commentIdentifier = '#'
-const configFileName = "monitor.ini"
+
+//const configFileName = "monitor.ini"
+const configFileExt = "ini"
 
 type Ini struct {
-	Config					map[string]string
-	configFilePath			string
+	Config         map[string]string
+	configFilePath string
 }
 
-var Conf *Ini
+var (
+	Conf   *Ini
+	file   = "config"
+	isInit = false
+)
 
-func Init() error{
+func Init(filename string) error {
+	if !isInit {
+		file = filename
+		isInit = true
+	}
 	err := NewIni().Load()
 	return err
 }
@@ -23,7 +33,7 @@ func Init() error{
 // NewIni : 构造函数 初始化配置结构
 func NewIni() *Ini {
 	Conf = &Ini{
-		Config: make(map[string]string),
+		Config:         make(map[string]string),
 		configFilePath: "/etc/",
 	}
 
@@ -31,39 +41,39 @@ func NewIni() *Ini {
 }
 
 // Load :  加载配置文件配置项
-func (config *Ini) Load() error{
-	var configFileName = config.configFilePath+configFileName
+func (config *Ini) Load() error {
+	var configFileName = config.configFilePath + file + "." + configFileExt
 
-	file,err := os.OpenFile(configFileName,os.O_RDONLY, 0755)
+	file, err := os.OpenFile(configFileName, os.O_RDONLY, 0755)
 	if err != nil {
 		log.Panic(err.Error())
 	}
 
-	length, err := file.Seek(0,2)
+	length, err := file.Seek(0, 2)
 	if err != nil {
 		return err
 	}
-	var b = make([]byte,length)
+	var b = make([]byte, length)
 
-	_, err = file.Seek(0,0)
+	_, err = file.Seek(0, 0)
 	if err != nil {
 		return err
 	}
 
-	_,err = file.Read(b)
+	_, err = file.Read(b)
 	if err != nil {
 		return err
 	}
 	// 读取成功之后，加入一个结束符
-	b = append(b,byte('\n'))
+	b = append(b, byte('\n'))
 
-	var byteStr = make([]byte,0)
+	var byteStr = make([]byte, 0)
 
 	var commentFlag = false
 
 	var lineStart = true
 
-	for _,char := range b {
+	for _, char := range b {
 		// # 作为注释
 		if char == byte(commentIdentifier) && lineStart {
 			commentFlag = true // 表示此行是注释行
@@ -75,20 +85,20 @@ func (config *Ini) Load() error{
 			if commentFlag {
 				// 表示刚刚读取的那一行是注释行，下面过程不用处理直接重置 byteStr
 				byteStr = byteStr[0:0]
-				commentFlag = false  // 重置标识符
+				commentFlag = false // 重置标识符
 				continue
 			}
 
-			if len(byteStr) == 0 {  // 空行 直接读取下一行
+			if len(byteStr) == 0 { // 空行 直接读取下一行
 				continue
 			}
 
 			flag := 0
 			keyEnd := 0
 			valueStart := 0
-			for index,t := range byteStr {
+			for index, t := range byteStr {
 				if t == byte(' ') || t == byte('\t') {
-					if flag == 0{
+					if flag == 0 {
 						keyEnd = index
 					}
 					flag = 1
@@ -111,9 +121,8 @@ func (config *Ini) Load() error{
 }
 
 func (config *Ini) C(key string) string {
-	if val , ok := config.Config[key]; ok {
+	if val, ok := config.Config[key]; ok {
 		return val
 	}
 	return ""
 }
-
