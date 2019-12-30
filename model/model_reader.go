@@ -15,28 +15,28 @@ type ReaderContract interface {
 
 	Filter(key string, val ...interface{}) ReaderContract
 
-	Count()						int64
+	Count() int64
 }
 
 type Reader struct {
-	model 		*modelInfo
-	where 		[]interface{}
+	model *modelInfo
+	where []interface{}
 }
 
 func (r *Reader) Filter(key string, val ...interface{}) ReaderContract {
 
-	if len(val) ==0 || len(val) > 2 {
-		log.Panic(fmt.Errorf("参数 val 数量不能大于2个或者小于1个，当前参数数量为%d",len(val)))
+	if len(val) == 0 || len(val) > 2 {
+		log.Panic(fmt.Errorf("参数 val 数量不能大于2个或者小于1个，当前参数数量为%d", len(val)))
 	}
 
 	var where []interface{}
 	if len(val) == 1 {
-		where = []interface{}{key,"=",val[0]}
-	}else {
-		where = []interface{}{key,val[0],val[1]}
+		where = []interface{}{key, "=", val[0]}
+	} else {
+		where = []interface{}{key, val[0], val[1]}
 	}
 
-	r.where = append(r.where,where)
+	r.where = append(r.where, where)
 	return r
 }
 
@@ -60,7 +60,6 @@ func (r *Reader) GetAll(models interface{}) (int64, error) {
 		var ref interface{}
 		refs[i] = &ref
 	}
-
 
 	var count int64 = 0
 
@@ -116,8 +115,8 @@ func convertDataType(field *reflect.Value, val interface{}) interface{} {
 		if t == 0 {
 			iv := reflect.ValueOf(val).Elem().Interface().(int64)
 			return int(iv)
-		}else {
-			iv,_ := strconv.ParseInt(s,0,0)
+		} else {
+			iv, _ := strconv.ParseInt(s, 0, 0)
 			return int(iv)
 		}
 	case string:
@@ -149,7 +148,7 @@ func (r *Reader) GetOne(model interface{}) error {
 		return err
 	}
 
-	setColsValue(&obj,refs...)
+	setColsValue(&obj, refs...)
 
 	if ind.CanSet() {
 		ind.Set(obj)
@@ -159,7 +158,7 @@ func (r *Reader) GetOne(model interface{}) error {
 
 func (r *Reader) Count() int64 {
 
-	count,err := db.Db.Connector().Table(r.model.table).Where(r.where...).Count()
+	count, err := db.Db.Connector().Table(r.model.table).Where(r.where...).Count()
 
 	if err != nil {
 		log.Panic(err.Error())

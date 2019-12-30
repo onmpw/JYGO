@@ -8,30 +8,29 @@ import (
 )
 
 var (
-	modelContainer = &models {
-		container : make(map[string]*modelInfo),
-		containerByFullName:make(map[string]*modelInfo),
+	modelContainer = &models{
+		container:           make(map[string]*modelInfo),
+		containerByFullName: make(map[string]*modelInfo),
 	}
 )
 
 type modelInfo struct {
-	modelName		string
-	model			interface{}
-	fields			[]string
-	table 			string
-	connection 		string
-
+	modelName  string
+	model      interface{}
+	fields     []string
+	table      string
+	connection string
 }
 
 type models struct {
-	container 				map[string]*modelInfo
-	containerByFullName		map[string]*modelInfo
+	container           map[string]*modelInfo
+	containerByFullName map[string]*modelInfo
 }
 
 type ContractModel interface {
-	GetOne()	*modelInfo
-	Get()		[]*modelInfo
-	Count()		int64
+	GetOne() *modelInfo
+	Get() []*modelInfo
+	Count() int64
 }
 
 func Init() {
@@ -59,13 +58,13 @@ func register(model interface{}) {
 
 	name := getFullName(sv)
 
-	if _,ok := modelContainer.fetchModelByFullName(name); ok {
+	if _, ok := modelContainer.fetchModelByFullName(name); ok {
 		panic(fmt.Errorf("model `%s` repeat register, must be unique\n", name))
 	}
 
 	table := getTableName(sv)
 
-	if _,ok := modelContainer.fetchModelByTable(table); ok {
+	if _, ok := modelContainer.fetchModelByTable(table); ok {
 		panic(fmt.Errorf("table name `%s` repeat register, must be unique\n", table))
 	}
 
@@ -73,21 +72,21 @@ func register(model interface{}) {
 	modelInfo.model = model
 	modelInfo.table = table
 
-	modelContainer.add(table,modelInfo)
+	modelContainer.add(table, modelInfo)
 
 }
 
-func (m *models)fetchModelByFullName(name string)(*modelInfo,bool) {
-	mi,ok := m.containerByFullName[name]
+func (m *models) fetchModelByFullName(name string) (*modelInfo, bool) {
+	mi, ok := m.containerByFullName[name]
 	return mi, ok
 }
 
-func (m *models)fetchModelByTable(table string) (*modelInfo,bool) {
-	mi,ok := m.container[table]
-	return mi,ok
+func (m *models) fetchModelByTable(table string) (*modelInfo, bool) {
+	mi, ok := m.container[table]
+	return mi, ok
 }
 
-func (m *models)fetchModel(model interface{},needPtr bool)(*modelInfo,reflect.Value,bool) {
+func (m *models) fetchModel(model interface{}, needPtr bool) (*modelInfo, reflect.Value, bool) {
 	sv := reflect.ValueOf(model)
 	snd := reflect.Indirect(sv)
 
@@ -97,13 +96,13 @@ func (m *models)fetchModel(model interface{},needPtr bool)(*modelInfo,reflect.Va
 
 	name := getFullName(sv)
 
-	if mi,ok := m.fetchModelByFullName(name); ok {
-		return mi,snd,ok
+	if mi, ok := m.fetchModelByFullName(name); ok {
+		return mi, snd, ok
 	}
-	return nil,snd,false
+	return nil, snd, false
 }
 
-func (m *models)add(table string,model *modelInfo) bool {
+func (m *models) add(table string, model *modelInfo) bool {
 	m.container[table] = model
 	m.containerByFullName[model.modelName] = model
 
@@ -112,7 +111,7 @@ func (m *models)add(table string,model *modelInfo) bool {
 
 // Read 获取指定model的Reader 从而可以进行数据的读取
 func Read(model interface{}) ReaderContract {
-	mi ,_, ok := modelContainer.fetchModel(model,true)
+	mi, _, ok := modelContainer.fetchModel(model, true)
 	if !ok {
 		panic(fmt.Errorf("model `%s` has not been registered！", reflect.Indirect(reflect.ValueOf(model)).Type().Name()))
 	}
@@ -124,7 +123,7 @@ func Read(model interface{}) ReaderContract {
 
 // Add 添加记录
 func Add(model interface{}) (lastInsertId int64) {
-	mi,snd,ok := modelContainer.fetchModel(model,false)
+	mi, snd, ok := modelContainer.fetchModel(model, false)
 
 	if !ok {
 		panic(fmt.Errorf("model `%s` has not been registered！", reflect.Indirect(reflect.ValueOf(model)).Type().Name()))
@@ -132,25 +131,24 @@ func Add(model interface{}) (lastInsertId int64) {
 
 	var insertData []interface{}
 
-	for index,field := range mi.fields {
+	for index, field := range mi.fields {
 		fieldObj := snd.Field(index)
 
-		insertData = append(insertData,[]interface{}{field,fieldObj.Interface()})
+		insertData = append(insertData, []interface{}{field, fieldObj.Interface()})
 	}
 
 	connect := getConnector(mi)
 
-	result,err := connect.Table(mi.table).Add(insertData...)
+	result, err := connect.Table(mi.table).Add(insertData...)
 
 	if err != nil {
-		panic(fmt.Errorf("Insert `%s` Failed ",mi.table))
+		panic(fmt.Errorf("Insert `%s` Failed ", mi.table))
 	}
 
-	lastInsertId ,_ = result.LastInsertId()
+	lastInsertId, _ = result.LastInsertId()
 
 	return lastInsertId
 }
-
 
 func getConnector(mi *modelInfo) db.BaseDbContract {
 	connect := db.Db.Connector()

@@ -16,14 +16,15 @@ type Ini struct {
 }
 
 var (
-	Conf   *Ini
-	file   = "config"
-	isInit = false
+	Conf       *Ini
+	filename   = "config"
+	configFile = ""
+	isInit     = false
 )
 
-func Init(filename string) error {
+func Init(file string) error {
 	if !isInit {
-		file = filename
+		configFile = file
 		isInit = true
 	}
 	err := NewIni().Load()
@@ -42,7 +43,12 @@ func NewIni() *Ini {
 
 // Load :  加载配置文件配置项
 func (config *Ini) Load() error {
-	var configFileName = config.configFilePath + file + "." + configFileExt
+	var configFileName string
+	if configFile == "" {
+		configFileName = config.configFilePath + filename + "." + configFileExt
+	} else {
+		configFileName = configFile
+	}
 
 	file, err := os.OpenFile(configFileName, os.O_RDONLY, 0755)
 	if err != nil {

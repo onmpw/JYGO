@@ -1,9 +1,8 @@
 package db
 
-
 type NoDriverError struct {
-	errMsg 	string
-	Err 	error
+	errMsg string
+	Err    error
 }
 
 func (e *NoDriverError) Error() string {
@@ -15,8 +14,8 @@ func (e *NoDriverError) Error() string {
 }
 
 type ConnectionError struct {
-	errMsg	string
-	Err 	error
+	errMsg string
+	Err    error
 }
 
 func (e *ConnectionError) Error() string {

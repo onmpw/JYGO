@@ -5,14 +5,15 @@ import (
 	"sync"
 )
 
-var Db      = &BaseDb{}
-const DefaultConnection = "production"   // 默认的连接名称  需要在配置文件(config.go)中添加其相应的配置项
+var Db = &BaseDb{}
+
+const DefaultConnection = "production" // 默认的连接名称  需要在配置文件(config.go)中添加其相应的配置项
 
 type BaseDb struct {
 	sync.RWMutex
-	GetConnection 	func(source string) BaseDbContract
-	dbServers   	map[string]BaseDbServer
-	dataSource		map[string]string
+	GetConnection func(source string) BaseDbContract
+	dbServers     map[string]BaseDbServer
+	dataSource    map[string]string
 }
 
 type BaseDbServer interface {
@@ -21,16 +22,16 @@ type BaseDbServer interface {
 }
 
 type BaseDbContract interface {
-	Table(table string)									BaseDbContract
-	GetTable()											string
-	Select(fields ...string)							BaseDbContract
-	Where(where ...interface{})							BaseDbContract
-	Get()												*Rows
-	GetOne()											*Row
-	Add(addData ...interface{})							(Result,error)
-	Adds (addField []string,addValues ...interface{}) 	(int64,error)
-	Update(updateData ...interface{})					(Result,error)
-	Count()												(int64,error)
+	Table(table string) BaseDbContract
+	GetTable() string
+	Select(fields ...string) BaseDbContract
+	Where(where ...interface{}) BaseDbContract
+	Get() *Rows
+	GetOne() *Row
+	Add(addData ...interface{}) (Result, error)
+	Adds(addField []string, addValues ...interface{}) (int64, error)
+	Update(updateData ...interface{}) (Result, error)
+	Count() (int64, error)
 }
 
 func (db *BaseDb) Init() error {
@@ -51,24 +52,24 @@ func (db *BaseDb) Init() error {
 	return err
 }
 
-func (db *BaseDb) SwitchServer(driverName string) error{
+func (db *BaseDb) SwitchServer(driverName string) error {
 	if server, ok := db.dbServers[driverName]; ok {
 		db.GetConnection = server.Connection
 		return nil
 	}
-	return &NoDriverError{errMsg:driverName+" driver not found!",Err:nil}
+	return &NoDriverError{errMsg: driverName + " driver not found!", Err: nil}
 }
 
 func (db *BaseDb) getDataSource(connection string) string {
-	if dataSource , ok := db.dataSource[connection]; ok {
+	if dataSource, ok := db.dataSource[connection]; ok {
 		return dataSource
 	}
 	localConn := connections[connection]
 	var port = ""
 	if val, ok := localConn["port"]; ok {
-		port = ":"+val
+		port = ":" + val
 	}
-	source := localConn["username"]+":"+localConn["password"]+"@tcp("+localConn["host"]+port+")/"+localConn["database"]
+	source := localConn["username"] + ":" + localConn["password"] + "@tcp(" + localConn["host"] + port + ")/" + localConn["database"]
 	db.Lock()
 	db.dataSource[connection] = source
 	db.Unlock()

@@ -7,9 +7,9 @@ import (
 )
 
 type OrderInfo struct {
-	Id 				int
-	Oid 			string
-	Username 		string
+	Id       int
+	Oid      string
+	Username string
 }
 
 func (o *OrderInfo) TableName() string {
@@ -22,7 +22,7 @@ func ExampleReader_GetOne() {
 
 	var order *OrderInfo
 
-	err := Read(new(OrderInfo)).Filter("id",87).GetOne(&order)
+	err := Read(new(OrderInfo)).Filter("id", 87).GetOne(&order)
 
 	if err != nil {
 		log.Panic(err.Error())
@@ -50,7 +50,7 @@ func ExampleReader_GetAll() {
 
 	var orders []*OrderInfo
 
-	num , err := Read(new(OrderInfo)).Filter("id",87).GetAll(&orders)
+	num, err := Read(new(OrderInfo)).Filter("id", 87).GetAll(&orders)
 
 	if err != nil {
 		log.Panic(err.Error())
@@ -68,7 +68,7 @@ func TestReaderGetOne(t *testing.T) {
 	t.Parallel()
 	var order *OrderInfo
 
-	err := Read(new(OrderInfo)).Filter("id",87).GetOne(&order)
+	err := Read(new(OrderInfo)).Filter("id", 87).GetOne(&order)
 
 	if err != nil {
 		t.Fatal(err.Error())

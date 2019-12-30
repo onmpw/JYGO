@@ -19,10 +19,10 @@ func getTableName(val reflect.Value) string {
 
 func newModelInfo(val reflect.Value) *modelInfo {
 	mi := &modelInfo{}
-	mi.fields = make([]string,0)
+	mi.fields = make([]string, 0)
 	mi.modelName = getFullName(val)
 	mi.connection = getConnection(val) // 使用默认的连接
-	addFields(mi,val)
+	addFields(mi, val)
 	return mi
 }
 
@@ -44,16 +44,16 @@ func getConnection(val reflect.Value) string {
 	return ""
 }
 
-func addFields(model *modelInfo,val reflect.Value) {
+func addFields(model *modelInfo, val reflect.Value) {
 	vt := reflect.Indirect(val).Type()
-	for i:=0 ; i < vt.NumField(); i++ {
-		model.fields = append(model.fields,LcFirst(vt.Field(i).Name))
+	for i := 0; i < vt.NumField(); i++ {
+		model.fields = append(model.fields, LcFirst(vt.Field(i).Name))
 	}
 }
 
 func LcFirst(str string) string {
-	for i,v := range str {
-		return string(unicode.ToLower(v))+str[i+1:]
+	for i, v := range str {
+		return string(unicode.ToLower(v)) + str[i+1:]
 	}
 
 	return ""
