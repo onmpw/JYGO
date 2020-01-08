@@ -1,8 +1,8 @@
 package model
 
 import (
-	"JYGO/db"
 	"fmt"
+	"github.com/onmpw/JYGO/db"
 	"log"
 	"reflect"
 	"strconv"
