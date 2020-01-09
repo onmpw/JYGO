@@ -122,11 +122,11 @@ func Read(model interface{}) ReaderContract {
 }
 
 // Add 添加记录
-func Add(model interface{}) (lastInsertId int64) {
+func Add(model interface{}) (lastInsertId int64, err error) {
 	mi, snd, ok := modelContainer.fetchModel(model, false)
 
 	if !ok {
-		panic(fmt.Errorf("model `%s` has not been registered！", reflect.Indirect(reflect.ValueOf(model)).Type().Name()))
+		return lastInsertId, fmt.Errorf("model `%s` has not been registered！", reflect.Indirect(reflect.ValueOf(model)).Type().Name())
 	}
 
 	var insertData []interface{}
@@ -142,12 +142,12 @@ func Add(model interface{}) (lastInsertId int64) {
 	result, err := connect.Table(mi.table).Add(insertData...)
 
 	if err != nil {
-		panic(fmt.Errorf("Insert `%s` Failed ", mi.table))
+		return lastInsertId, err
 	}
 
 	lastInsertId, _ = result.LastInsertId()
 
-	return lastInsertId
+	return
 }
 
 func getConnector(mi *modelInfo) db.BaseDbContract {
