@@ -298,7 +298,7 @@ func (m *Mysql) Update(updateData ...interface{}) (Result, error) {
 		fields = append(fields, v[0].(string))
 		updateValue = append(updateValue, v[1])
 	}
-	m.buildInsertSql(fields)
+	m.buildUpdateSql(fields)
 	defer m.free()
 
 	return m.update(updateValue...)

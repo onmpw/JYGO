@@ -150,6 +150,34 @@ func Add(model interface{}) (lastInsertId int64, err error) {
 	return
 }
 
+func Update(model interface{},where []interface{}) (rows int64,err error) {
+	mi, snd, ok := modelContainer.fetchModel(model, false)
+
+	if !ok {
+		return rows, fmt.Errorf("model `%s` has not been registered！", reflect.Indirect(reflect.ValueOf(model)).Type().Name())
+	}
+
+	var insertData []interface{}
+
+	for index, field := range mi.fields {
+		fieldObj := snd.Field(index)
+
+		insertData = append(insertData, []interface{}{field, fieldObj.Interface()})
+	}
+
+	connect := getConnector(mi)
+
+	result, err := connect.Table(mi.table).Where(where...).Update(insertData...)
+
+	if err != nil {
+		return rows, err
+	}
+
+	rows, _ = result.RowsAffected()
+
+	return
+}
+
 func getConnector(mi *modelInfo) db.BaseDbContract {
 	connect := db.Db.Connector()
 	if mi.connection != "" {

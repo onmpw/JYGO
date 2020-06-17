@@ -39,7 +39,7 @@ func ExampleAdd() {
 	order.Oid = "3423328"
 	order.Username = "JYGO"
 
-	lastInsertId := Add(order)
+	lastInsertId,_ := Add(order)
 
 	fmt.Println(lastInsertId)
 }
@@ -84,7 +84,7 @@ func TestAdd(t *testing.T) {
 	order.Oid = "3423328"
 	order.Username = "jiyic1"
 
-	lastInsertId := Add(order)
+	lastInsertId,_ := Add(order)
 
 	fmt.Println(lastInsertId)
 }
