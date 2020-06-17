@@ -358,6 +358,11 @@ func (m *Mysql) buildUpdateSql(fields []string) {
 		}
 		update += "`" + field + "`=?"
 	}
+
+	if len(m.where) > 0 {
+		m.where = " WHERE "+ m.where
+	}
+
 	m.sql += update + m.where
 }
 
