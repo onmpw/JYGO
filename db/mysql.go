@@ -125,11 +125,11 @@ func (pool *MysqlPool) pop() <-chan *Mysql {
 	var mysql = make(chan *Mysql, 1)
 	for pool.num == pool.space && pool.head == pool.tail {
 	} // 如果队列已经满了，并且队列中的所有元素都正在使用，则等待释放元素
-	pool.RLock()
+	pool.Lock()
 	if pool.num == 0 {
 		m = NewMysql()
 		pool.num++
-		pool.RUnlock()
+		pool.Unlock()
 		mysql <- m
 		return mysql
 	}
@@ -138,7 +138,7 @@ func (pool *MysqlPool) pop() <-chan *Mysql {
 		m = pool.pool[pool.head]
 		pool.pool = append(pool.pool[:pool.head], pool.pool[pool.head+1:]...)
 		pool.tail = len(pool.pool)
-		pool.RUnlock()
+		pool.Unlock()
 		mysql <- m
 		return mysql
 	}
@@ -146,11 +146,11 @@ func (pool *MysqlPool) pop() <-chan *Mysql {
 	if pool.num < pool.space {
 		m = NewMysql()
 		pool.num++
-		pool.RUnlock()
+		pool.Unlock()
 		mysql <- m
 		return mysql
 	}
-	pool.RUnlock()
+	pool.Unlock()
 	return nil
 }
 
